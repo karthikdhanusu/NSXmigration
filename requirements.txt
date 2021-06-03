@@ -4,5 +4,3 @@ ElementTree
 lxml
 pyVim
 pyVmomi
-os
-time
