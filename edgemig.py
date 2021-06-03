@@ -2605,5 +2605,5 @@ def spcrte():
     print('##-- Created and applied Security policies at the destination --##')
 
 if __name__ == '__main__':
-    userinput()
+    userinput() 
 
