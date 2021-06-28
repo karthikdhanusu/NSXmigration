@@ -15,7 +15,7 @@ from requests.auth import HTTPBasicAuth
 import getpass
 from xml.etree import ElementTree as ET
 from lxml import etree
-from pyVim import connect
+from pyvim import connect
 from pyVmomi import vim
 import os
 import time
@@ -65,13 +65,13 @@ def userinput():                #user input
     print("")
     print("## Instructions: ##")
     print("====================")
-    print("1. Please create all the required gateways before proceeding for other config migrations")
+    print("1. Please create all the required edge gateways before proceeding for other config migrations")
     print("2. The script will automatically creates grouping objects and all the required security groups")
     print("3. The script will re-map all the grouping objects and the security groups, if any associated with the firewall rules")
     print("4. If the vSphere objects doesn't exist in the destination environment, the script will exclude the associated objects")
-    print("5. End user will be presented with the list of vSphere Objects that are not avaiable at the destination side ")
-    print("6. End-user will be presented with the list of edge and distributed firewall rules that needs manual intervention")
-    print("7. Some of the rules may not have vSphere object association as the some of them may not be present at the destination side")
+    print("5. End user will be presented with the list of vSphere Objects that are not avaiable at the destination side")
+    print("6. Some of the rules may not have vSphere object association as some of them may not be present at the destination side")
+    print("7. End-user will be presented with the list of edge and distributed firewall rules that needs manual intervention")
     print("")
     global sourcevc, sourcevcun, sourcevcpss, sourcepcc,sourceun, sourcepss, sport, destvc, destvcun, destvcpss, destpcc, destun, destpass, dport, nsx_sbaseurl, nsx_dbaseurl
     sourcevc = input('Enter Source vCenter Hostname/IP:')
@@ -418,6 +418,12 @@ def getedge(edgeid, edgpass):
     appmemb = (b''.join(map(etree.tostring, appmemres))).strip().decode()
     ls = []
     dls = {}
+    for child in xml.iter():
+        for child1 in list(child):
+            if child1.find('vnic'):
+                for child2 in list(child1):
+                    if child2.find('type').text != 'uplink':
+                        child2.find('isConnected').text = 'false'
     for child in xml.findall('.//vnics/vnic/portgroupName'):
         ls.append(child.text)
     lsno = len(ls)
@@ -2605,5 +2611,5 @@ def spcrte():
     print('##-- Created and applied Security policies at the destination --##')
 
 if __name__ == '__main__':
-    userinput() 
+    userinput()
 
