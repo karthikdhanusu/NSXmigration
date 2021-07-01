@@ -79,14 +79,14 @@ def userinput():                #user input
     sourcevcpss = getpass.getpass(prompt='Enter Source vCenter Password:')
     sourcepcc = input('Enter Source NSX Hostname/IP:')
     sourceun = input('Enter Source NSX UserName:')
-    sourcepss = getpass.getpass(prompt='Enter Source vCenter Password:')
+    sourcepss = getpass.getpass(prompt='Enter Source NSX Password:')
     sport = 443
     destvc = input('Enter Destination vCenter Hostname/IP:')
     destvcun = input('Enter Destination  vCenter UserName:')
     destvcpss = getpass.getpass(prompt='Enter Destination vCenter Password:')
     destpcc = input('Enter Destination NSX Hostname/IP:')
     destun = input('Enter Destination NSX UserName:')
-    destpass = getpass.getpass(prompt='Enter Destination vCenter Password:')
+    destpass = getpass.getpass(prompt='Enter Destination NSX Password:')
     dport = 443
     nsx_sbaseurl = 'https://' + sourcepcc + '/api'
     nsx_dbaseurl = 'https://' + destpcc + '/api'
@@ -134,7 +134,7 @@ def objecttype(objtype):   #type selection
 def getvdn():
     vdn={}
     vdnurl = nsx_dbaseurl+vdnscopes
-    vdnreq = requests.get(vdnurl, headers={'Content-Type': 'application/*+xml;version=5.7'},auth=HTTPBasicAuth(destun, destpass))
+    vdnreq = requests.get(vdnurl, headers={'Content-Type': 'application/xml'},auth=HTTPBasicAuth(destun, destpass))
     cont = vdnreq.content
     xml = ET.fromstring(cont)
     for child in xml.findall('vdnScope'):
@@ -148,7 +148,7 @@ def getvdn():
 def vdnls(dvdn):
     vdls = {}
     vdnlsurl = nsx_dbaseurl+vdnscopes+'/'+dvdn+virtualwires
-    vdnlsreq = requests.get(vdnlsurl, headers={'Content-Type': 'application/*+xml;version=5.7'},auth=HTTPBasicAuth(destun, destpass))
+    vdnlsreq = requests.get(vdnlsurl, headers={'Content-Type': 'application/xml'},auth=HTTPBasicAuth(destun, destpass))
     cont = vdnlsreq.content
     xml = ET.fromstring(cont)
     for child in xml.findall('.//virtualWire'):
@@ -263,8 +263,9 @@ def vmid(viewType, host, user, pwd, port):
 
 def getedges():
     getedges = nsx_sbaseurl+edgeget
-    edgereq = requests.get(getedges, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    edgereq = requests.get(getedges, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = edgereq.content
+    print(cont)
     # get edge names
     xml = ET.fromstring(cont)
     objectId = {}
@@ -278,7 +279,7 @@ def getedges():
 
 def getdedges():
     getedges = nsx_dbaseurl+edgeget
-    edgereq = requests.get(getedges, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+    edgereq = requests.get(getedges, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
     cont = edgereq.content
     # get edge names
     xml = ET.fromstring(cont)
@@ -294,7 +295,7 @@ def getdedges():
 def getsls():
     sls = {}
     lsurl = nsx_sbaseurl + virtwire+'?pagesize=1024'
-    lsreq = requests.get(lsurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    lsreq = requests.get(lsurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = lsreq.content
     xml = etree.fromstring(cont)
     for child in xml.findall('.//virtualWire'):
@@ -306,7 +307,7 @@ def getsls():
 def getdls():
     dls = {}
     lsurl = nsx_dbaseurl + virtwire+'?pagesize=1024'
-    lsreq = requests.get(lsurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+    lsreq = requests.get(lsurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
     cont = lsreq.content
     xml = etree.fromstring(cont)
     for child in xml.findall('.//virtualWire'):
@@ -318,7 +319,7 @@ def getdls():
 def getsipsets():
     sips = {}
     ipsurl = nsx_sbaseurl + ipset + '/scope/globalroot-0'
-    ipsreq = requests.get(ipsurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    ipsreq = requests.get(ipsurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = ipsreq.content
     xml = etree.fromstring(cont)
     for child in xml.findall('.//ipset'):
@@ -330,7 +331,7 @@ def getsipsets():
 def getdipsets():
     dips = {}
     ipsurl = nsx_dbaseurl + ipset + '/scope/globalroot-0'
-    ipsreq = requests.get(ipsurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+    ipsreq = requests.get(ipsurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
     cont = ipsreq.content
     xml = etree.fromstring(cont)
     for child in xml.findall('.//ipset'):
@@ -356,7 +357,7 @@ def getedge(edgeid, edgpass):
     xmlhead = '<?xml version="1.0" encoding="UTF-8"?>'
     lsxml = '<virtualWireCreateSpec><name>ls[i]</name><tenantId>Default vxLan of Datacenter</tenantId><controlPlaneMode>UNICAST_MODE</controlPlaneMode><guestVlanAllowed>false</guestVlanAllowed></virtualWireCreateSpec>'
     getedges = nsx_sbaseurl+edgeget+'/'+edgeid
-    edgereq = requests.get(getedges, headers={'Content-Type': 'application/*+xml;version=5.7'},auth=HTTPBasicAuth(sourceun, sourcepss))
+    edgereq = requests.get(getedges, headers={'Content-Type': 'application/xml'},auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = edgereq.content
     xml = etree.fromstring(cont)
     os.system('cls')
@@ -491,7 +492,7 @@ def crtego(dcmoid):
     print("##-- Creating custom Applications, Application Groups and other Grouping Objects on the new Edge--## ")
     dedgs = getdedges()
     getgourl = nsx_sbaseurl+application+'/scope/globalroot-0'
-    getgo = requests.get(getgourl, headers={'Content-Type': 'application/*+xml;version=5.7'},auth=HTTPBasicAuth(sourceun, sourcepss))
+    getgo = requests.get(getgourl, headers={'Content-Type': 'application/xml'},auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = getgo.content
     xml = etree.fromstring(cont)
     for child in xml.xpath('//objectId'):
@@ -525,7 +526,7 @@ def crtego(dcmoid):
 def getapps():
     apps = {}
     getdgourl = nsx_dbaseurl + application + '/scope/globalroot-0'
-    getdgo = requests.get(getdgourl, headers={'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+    getdgo = requests.get(getdgourl, headers={'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
     cont1 = getdgo.content
     xml1 = etree.fromstring(cont1)
     for applist in xml1.findall('.//application'):
@@ -540,7 +541,7 @@ def getapps():
 def getsapps():
     apps = {}
     getgourl = nsx_sbaseurl + application + '/scope/globalroot-0'
-    getdgo = requests.get(getgourl, headers={'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    getdgo = requests.get(getgourl, headers={'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont1 = getdgo.content
     xml1 = etree.fromstring(cont1)
     for applist in xml1.findall('.//application'):
@@ -555,7 +556,7 @@ def getsapps():
 def sapgrp():
     sappgrp = {}
     getgoagurl = nsx_sbaseurl + applicationgroup + '/scope/globalroot-0'
-    getgo = requests.get(getgoagurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    getgo = requests.get(getgoagurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = getgo.content
     xml = etree.fromstring(cont)
@@ -569,7 +570,7 @@ def sapgrp():
 def dapgrp():
     dappgrp = {}
     getgodagurl = nsx_dbaseurl + applicationgroup + '/scope/globalroot-0'
-    getgo = requests.get(getgodagurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    getgo = requests.get(getgodagurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(destun, destpass))
     cont = getgo.content
     xml = etree.fromstring(cont)
@@ -585,7 +586,7 @@ def crtegoag(dcmoid):
     dedgs = getdedges()
     getgoagurl = nsx_sbaseurl + applicationgroup + '/scope/globalroot-0'
     getgodagurl = nsx_dbaseurl + applicationgroup + '/scope/globalroot-0'
-    getgo = requests.get(getgoagurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    getgo = requests.get(getgoagurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = getgo.content
     xml = etree.fromstring(cont)
@@ -637,7 +638,7 @@ def ipsets(dcmoid):
     print("##-- Creating IPsets on the new Edge --#")
     dedgs = getdedges()
     ipurl = nsx_sbaseurl+ipset+'/scope/globalroot-0'
-    ipreq = requests.get(ipurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    ipreq = requests.get(ipurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = ipreq.content
     xml = etree.fromstring(cont)
     for child in xml.xpath('//objectId'):
@@ -703,7 +704,7 @@ def edgfirewall(dcmoid):
     fwurl = nsx_sbaseurl+edgeget+'/'+edgeid+fwconfig
     fwdurl = nsx_dbaseurl + edgeget + '/' + edgeid1 + fwconfig+'/rules'
     fwdgeturl = nsx_dbaseurl + edgeget + '/' + edgeid1 + fwconfig
-    fwreq = requests.get(fwurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    fwreq = requests.get(fwurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = fwreq.content
     xml = etree.fromstring(cont)
     fwenable = xml.xpath('//firewall/enabled')
@@ -713,7 +714,7 @@ def edgfirewall(dcmoid):
     fwgcfigb = (b''.join(map(etree.tostring, fwgcfig))).strip().decode()
     fwdpcfigb = (b''.join(map(etree.tostring, fwdpcfig))).strip().decode()
     xmlcfgbdy = xmlheader+'<firewall>'+fwenableb+fwgcfigb+fwdpcfigb+'</firewall>'
-    fwdcfgreq = requests.put(fwdgeturl, data=xmlcfgbdy, headers={'Content-Type': 'application/xml;version=5.7'},
+    fwdcfgreq = requests.put(fwdgeturl, data=xmlcfgbdy, headers={'Content-Type': 'application/xml'},
                            auth=HTTPBasicAuth(destun, destpass))
     for child in xml.xpath('//id'):
         parent = child.getparent()
@@ -791,8 +792,8 @@ def edgfirewall(dcmoid):
         if rtype == 'user':
             fwbody = etree.tostring(rul).decode()
             xmlbody = xmlheader+'<firewallRules>'+fwbody+'</firewallRules>'
-            fwdreq = requests.post(fwdurl, data=xmlbody, headers={'Content-Type': 'application/xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
-            fwget = requests.get(fwdgeturl, headers = {'Content-Type': 'application/*+xml;version=5.7'},auth=HTTPBasicAuth(destun, destpass))
+            fwdreq = requests.post(fwdurl, data=xmlbody, headers={'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
+            fwget = requests.get(fwdgeturl, headers = {'Content-Type': 'application/xml'},auth=HTTPBasicAuth(destun, destpass))
             fwcont = fwget.content
             xml3 = etree.fromstring(fwcont)
             for child5 in xml3.findall('.//ruleTag'):
@@ -828,9 +829,9 @@ def edgfirewall(dcmoid):
                         parent.remove(goid)
                 fwbody = etree.tostring(rul).decode()
                 xmlbody = xmlheader + '<firewallRules>' + fwbody + '</firewallRules>'
-                fwdreq = requests.post(fwdurl, data=xmlbody, headers={'Content-Type': 'application/xml;version=5.7'},
+                fwdreq = requests.post(fwdurl, data=xmlbody, headers={'Content-Type': 'application/xml'},
                                        auth=HTTPBasicAuth(destun, destpass))
-            fwget = requests.get(fwdgeturl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+            fwget = requests.get(fwdgeturl, headers={'Content-Type': 'application/xml'},
                                  auth=HTTPBasicAuth(destun, destpass))
             fwcont = fwget.content
             xml3 = etree.fromstring(fwcont)
@@ -850,7 +851,7 @@ def edgnat(dcmoid,appsobjs,rulchk):
         sedg = list(sedg.keys())[list(sedg.values()).index(edgeid)]
         edgeid1 = dedg[sedg]
     naturl = nsx_sbaseurl+edgeget+'/'+edgeid+natconfig
-    natreq = requests.get(naturl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss ))
+    natreq = requests.get(naturl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss ))
     cont = natreq.content
     xml = etree.fromstring(cont)
     for child in xml.xpath('//ruleId'):
@@ -864,7 +865,7 @@ def edgnat(dcmoid,appsobjs,rulchk):
     natbody = (b''.join(map(etree.tostring, natrules))).strip().decode()
     xmlbody = xmlheader+natbody
     naturl = nsx_dbaseurl + edgeget + '/' + edgeid1 + natconfigrules
-    natreq = requests.post(naturl, data=xmlbody, headers={'Content-Type': 'application/xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+    natreq = requests.post(naturl, data=xmlbody, headers={'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
     edgdhcp(dcmoid,appsobjs,rulchk)
 
                         # create dhcp pools and relays
@@ -881,7 +882,7 @@ def edgdhcp(dcmoid,appsobjs,rulchk):
         sedg = list(sedg.keys())[list(sedg.values()).index(edgeid)]
         edgeid1 = dedg[sedg]
     dhcpurl = nsx_sbaseurl+edgeget+'/'+edgeid+dhcpconfig
-    dhcpreq = requests.get(dhcpurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    dhcpreq = requests.get(dhcpurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = dhcpreq.content
     xml = etree.fromstring(cont)
     ippool = xml.xpath('//ipPool')
@@ -890,7 +891,7 @@ def edgdhcp(dcmoid,appsobjs,rulchk):
         ipbody = xmlheader + '<ipPool>'+ippoolbody +'</ipPool>'
         ipoolurl = nsx_dbaseurl + edgeget + '/' + edgeid1 + dhcppool
         dpool = requests.post(ipoolurl, data=ipbody,
-                              headers={'Content-Type': 'application/xml;version=5.7'},
+                              headers={'Content-Type': 'application/xml'},
                               auth=HTTPBasicAuth(destun, destpass))
     for child in xml.findall('.//groupingObjectId'):
         if child.text in sips.values():
@@ -899,7 +900,7 @@ def edgdhcp(dcmoid,appsobjs,rulchk):
     relay = xml.xpath('//relay')
     relaybody = (b''.join(map(etree.tostring, relay))).strip().decode()
     relayurl = nsx_dbaseurl+edgeget+'/'+edgeid1+dhcprelay
-    drelay = requests.put(relayurl, data=xmlheader+relaybody, headers={'Content-Type': 'application/xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+    drelay = requests.put(relayurl, data=xmlheader+relaybody, headers={'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
     edgipsec(dcmoid,appsobjs,rulchk)
 
                         # create ipsec sites
@@ -913,7 +914,7 @@ def edgipsec(dcmoid,appsobjs,rulchk):
         sedg = list(sedg.keys())[list(sedg.values()).index(edgeid)]
         edgeid1 = dedg[sedg]
     ipsecurl = nsx_sbaseurl+edgeget+'/'+edgeid+ipsec+'?showSensitiveData=true'
-    ipsecreq = requests.get(ipsecurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    ipsecreq = requests.get(ipsecurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = ipsecreq.content
     xml = etree.fromstring(cont)
     xml.find('enabled').text = 'false'
@@ -928,7 +929,7 @@ def edgipsec(dcmoid,appsobjs,rulchk):
     ipsecbody = (b''.join(map(etree.tostring, ipsecbdy))).strip().decode()
     xmlbody = xmlheader + ipsecbody
     ipsecpsturl = nsx_dbaseurl+edgeget+'/'+edgeid1+ipsec
-    requests.put(ipsecpsturl, data= xmlbody, headers={'Content-Type': 'application/xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+    requests.put(ipsecpsturl, data= xmlbody, headers={'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
     os.system('cls')
     print("Edge gateway is ready for use")
     print("The following vSphere Objects are not avaiable at the destination environment")
@@ -942,7 +943,7 @@ def edgipsec(dcmoid,appsobjs,rulchk):
 def ssgroup():
     apps = {}
     sgurl = nsx_sbaseurl + sg + 'globalroot-0'
-    sgreq = requests.get(sgurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    sgreq = requests.get(sgurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = sgreq.content
     xml = etree.fromstring(cont)
@@ -956,7 +957,7 @@ def ssgroup():
 def dsgroup():
     apps = {}
     sgurl = nsx_dbaseurl + sg + 'globalroot-0'
-    sgreq = requests.get(sgurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    sgreq = requests.get(sgurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(destun, destpass))
     cont = sgreq.content
     xml = etree.fromstring(cont)
@@ -970,7 +971,7 @@ def dsgroup():
 def scspolicy():
     scp={}
     scsurl = nsx_sbaseurl + scpl + '/all?startIndex=0&pageSize=1024'
-    screq = requests.get(scsurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    screq = requests.get(scsurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = screq.content
     xml = etree.fromstring(cont)
@@ -984,7 +985,7 @@ def scspolicy():
 def scdpolicy():
     scp={}
     scsurl = nsx_dbaseurl + scpl + '/all?startIndex=0&pageSize=1024'
-    screq = requests.get(scsurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    screq = requests.get(scsurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(destun, destpass))
     cont = screq.content
     xml = etree.fromstring(cont)
@@ -1033,7 +1034,7 @@ def dfw():
     iptcfigurl = nsx_dbaseurl+dfwl3
     ipl3rsurl = nsx_dbaseurl+dfwl3rs
     ipl2url = nsx_dbaseurl+dfwl2
-    xptcfgreq = requests.get(xptcfigurl, headers={'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    xptcfgreq = requests.get(xptcfigurl, headers={'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = xptcfgreq.content
     xml = etree.fromstring(cont)
     print("##-- Modifying the existing configuration to suit the destination environment --##")
@@ -1347,7 +1348,7 @@ def dfw():
                         parent.remove(child9)
                     fwlbdy = etree.tostring(fwlsec).decode()
                     l3req = requests.post(iptcfigurl, data=xmlheader + fwlbdy,
-                                          headers={'Content-Type': 'application/xml;version=5.7'},
+                                          headers={'Content-Type': 'application/xml'},
                                           auth=HTTPBasicAuth(destun, destpass))
                     if l3req.status_code == 201:
                         secont = l3req.content
@@ -1360,7 +1361,7 @@ def dfw():
                             if len(rule) > 0:
                                 for i in range(0, len(rule)):
                                     xmlbody3 = xmlheader + rule[i].decode()
-                                    l3rulreq = requests.post(rulurl, data=xmlbody3, headers={'Content-Type': 'application/xml;version=5.7', 'If-Match': etg}, auth=HTTPBasicAuth(destun, destpass))
+                                    l3rulreq = requests.post(rulurl, data=xmlbody3, headers={'Content-Type': 'application/xml', 'If-Match': etg}, auth=HTTPBasicAuth(destun, destpass))
                                     if l3rulreq.status_code == 201:
                                         etg = l3rulreq.headers['ETag']
                                         i += 1
@@ -1477,7 +1478,7 @@ def dfw():
                                         rulexml = etree.tostring(rulxml)
                                         xmlbody3 = xmlheader + rulexml.decode()
                                         l3rulreq = requests.post(rulurl, data=xmlbody3,
-                                                                 headers={'Content-Type': 'application/xml;version=5.7','If-Match': etg}, auth=HTTPBasicAuth(destun, destpass))
+                                                                 headers={'Content-Type': 'application/xml','If-Match': etg}, auth=HTTPBasicAuth(destun, destpass))
                                         if l3rulreq.status_code == 201:
                                             etg = l3rulreq.headers['ETag']
                                             rucont = l3rulreq.content
@@ -1493,7 +1494,7 @@ def dfw():
                         parent.remove(child9)
                     fwlbdy = etree.tostring(fwlsec).decode()
                     l3req = requests.post(ipl2url, data=xmlheader + fwlbdy,
-                                          headers={'Content-Type': 'application/xml;version=5.7'},
+                                          headers={'Content-Type': 'application/xml'},
                                           auth=HTTPBasicAuth(destun, destpass))
                     if l3req.status_code == 201:
                         secont = l3req.content
@@ -1507,7 +1508,7 @@ def dfw():
                                 for i in range(0, len(rule)):
                                     xmlbody3 = xmlheader + rule[i].decode()
                                     l3rulreq = requests.post(rulurl, data=xmlbody3,
-                                                             headers={'Content-Type': 'application/xml;version=5.7',
+                                                             headers={'Content-Type': 'application/xml',
                                                                       'If-Match': etg},
                                                              auth=HTTPBasicAuth(destun, destpass))
                                     if l3rulreq.status_code == 201:
@@ -1626,7 +1627,7 @@ def dfw():
                                         rulexml = etree.tostring(rulxml)
                                         xmlbody3 = xmlheader + rulexml.decode()
                                         l3rulreq = requests.post(rulurl, data=xmlbody3,
-                                                                 headers={'Content-Type': 'application/xml;version=5.7',
+                                                                 headers={'Content-Type': 'application/xml',
                                                                           'If-Match': etg},
                                                                  auth=HTTPBasicAuth(destun, destpass))
                                         if l3rulreq.status_code == 201:
@@ -1644,7 +1645,7 @@ def dfw():
                         parent.remove(child9)
                     fwlbdy = etree.tostring(fwlsec).decode()
                     l3req = requests.post(ipl3rsurl, data=xmlheader + fwlbdy,
-                                          headers={'Content-Type': 'application/xml;version=5.7'},
+                                          headers={'Content-Type': 'application/xml'},
                                           auth=HTTPBasicAuth(destun, destpass))
                     if l3req.status_code == 201:
                         secont = l3req.content
@@ -1658,7 +1659,7 @@ def dfw():
                                 for i in range(0, len(rule)):
                                     xmlbody3 = xmlheader + rule[i].decode()
                                     l3rulreq = requests.post(rulurl, data=xmlbody3,
-                                                             headers={'Content-Type': 'application/xml;version=5.7',
+                                                             headers={'Content-Type': 'application/xml',
                                                                       'If-Match': etg},
                                                              auth=HTTPBasicAuth(destun, destpass))
                                     if l3rulreq.status_code == 201:
@@ -1777,7 +1778,7 @@ def dfw():
                                         rulexml = etree.tostring(rulxml)
                                         xmlbody3 = xmlheader + rulexml.decode()
                                         l3rulreq = requests.post(rulurl, data=xmlbody3,
-                                                                 headers={'Content-Type': 'application/xml;version=5.7',
+                                                                 headers={'Content-Type': 'application/xml',
                                                                           'If-Match': etg},
                                                                  auth=HTTPBasicAuth(destun, destpass))
                                         if l3rulreq.status_code == 201:
@@ -1832,7 +1833,7 @@ def sgcrte():
     os.system('cls')
     print("##-- Modifying and Pushing the Security groups XML to the destination environment --##")
     sgurl = nsx_sbaseurl + sg + 'globalroot-0'
-    sgreq = requests.get(sgurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    sgreq = requests.get(sgurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = sgreq.content
     xml = etree.fromstring(cont)
@@ -1840,7 +1841,7 @@ def sgcrte():
         if "securitygroup" in sgrp.text:
             objid = sgrp.text
             objidurl = nsx_sbaseurl + getojid + objid
-            objreq = requests.get(objidurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+            objreq = requests.get(objidurl, headers={'Content-Type': 'application/xml'},
                                   auth=HTTPBasicAuth(sourceun, sourcepss))
             cont1 = objreq.content
             xml1 = etree.fromstring(cont1)
@@ -2180,11 +2181,11 @@ def sgcrte():
             sgroup1 = (b''.join(map(etree.tostring, xml1))).strip().decode()
             objpsturl = nsx_dbaseurl + sgpost + 'globalroot-0'
             requests.post(objpsturl, data=xmlheader + '<securitygroup>' + sgroup1 + '</securitygroup>',
-                          headers={'Content-Type': 'application/xml;version=5.7'},
+                          headers={'Content-Type': 'application/xml'},
                           auth=HTTPBasicAuth(destun, destpass))
             desgrp = dsgroup()
             sgurl = nsx_sbaseurl + sg + 'globalroot-0'
-            sgreq = requests.get(sgurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+            sgreq = requests.get(sgurl, headers={'Content-Type': 'application/xml'},
                                  auth=HTTPBasicAuth(sourceun, sourcepss))
             cont = sgreq.content
             xml = etree.fromstring(cont)
@@ -2192,7 +2193,7 @@ def sgcrte():
                 if "securitygroup" in sgrp.text:
                     objid = sgrp.text
                     objidurl = nsx_sbaseurl + getojid + objid
-                    objreq = requests.get(objidurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+                    objreq = requests.get(objidurl, headers={'Content-Type': 'application/xml'},
                                           auth=HTTPBasicAuth(sourceun, sourcepss))
                     cont1 = objreq.content
                     xml1 = etree.fromstring(cont1)
@@ -2532,7 +2533,7 @@ def sgcrte():
                     sgroup1 = (b''.join(map(etree.tostring, xml1))).strip().decode()
                     objpsturl = nsx_dbaseurl + sgpost + 'globalroot-0'
                     requests.post(objpsturl, data=xmlheader + '<securitygroup>' + sgroup1 + '</securitygroup>',
-                                  headers={'Content-Type': 'application/xml;version=5.7'},
+                                  headers={'Content-Type': 'application/xml'},
                                   auth=HTTPBasicAuth(destun, destpass))
     print("##-- Security groups has been created at the destination side --##")
     time.sleep(5)
@@ -2548,15 +2549,15 @@ def spcrte():
     xmlheader = '<?xml version="1.0" encoding="UTF-8"?>'
     spurl = nsx_sbaseurl+spfwget
     spdurl = nsx_dbaseurl + spfwget
-    spreq = requests.get(spurl, headers = {'Content-Type': 'application/*+xml;version=5.7'}, auth=HTTPBasicAuth(sourceun, sourcepss))
+    spreq = requests.get(spurl, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = spreq.content
     xml = etree.fromstring(cont)
     appt = xml.find('appliedTo').text
     xmlbody = xmlheader+'<SecurityPolicyFirewallConfig><appliedTo>'+appt+'</appliedTo></SecurityPolicyFirewallConfig>'
-    requests.put(spdurl, data=xmlbody, headers = {'Content-Type': 'application/xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+    requests.put(spdurl, data=xmlbody, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
     scsurl = nsx_sbaseurl+scpl+'/all?startIndex=0&pageSize=1024'
     scdurl = nsx_dbaseurl + scpl
-    screq = requests.get(scsurl, headers={'Content-Type': 'application/*+xml;version=5.7'},
+    screq = requests.get(scsurl, headers={'Content-Type': 'application/xml'},
                          auth=HTTPBasicAuth(sourceun, sourcepss))
     cont = screq.content
     xml = etree.fromstring(cont)
@@ -2590,7 +2591,7 @@ def spcrte():
     for spolicy in xml.iter('securityPolicy'):
         scxml = etree.tostring(spolicy).decode()
         xmlbody1 = xmlheader + scxml
-        scdreq = requests.post(scdurl, data=xmlbody1, headers = {'Content-Type': 'application/xml;version=5.7'}, auth=HTTPBasicAuth(destun, destpass))
+        scdreq = requests.post(scdurl, data=xmlbody1, headers = {'Content-Type': 'application/xml'}, auth=HTTPBasicAuth(destun, destpass))
         srcsg = scspolicy()
         dessg = scdpolicy()
         for sgrp in xml.iter('objectId'):
@@ -2606,7 +2607,7 @@ def spcrte():
                         scxml = etree.tostring(spolicy).decode()
                         xmlbody1 = xmlheader + scxml
                         scdreq = requests.post(scdurl, data=xmlbody1,
-                                               headers={'Content-Type': 'application/xml;version=5.7'},
+                                               headers={'Content-Type': 'application/xml'},
                                                auth=HTTPBasicAuth(destun, destpass))
     print('##-- Created and applied Security policies at the destination --##')
 
